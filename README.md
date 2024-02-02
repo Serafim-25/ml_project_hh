@@ -5,3 +5,6 @@
 * Content makers
 * Студенты
 * Малый бизнес
+
+## Предобученная модель ML-модель
+Hugging face - basil-77/rut5-base-absum-hh
