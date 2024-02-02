@@ -9,7 +9,7 @@ def load_model ():
 
 def load_text():
     uploaded_text = st.text_input(
-        label ="Вставьте описание навыков и опыта для определения вакансии")
+        label ="Вставьте текст статьи")
     if uploaded_text is not None:
         return uploaded_text
     else:
@@ -18,9 +18,9 @@ def load_text():
 model_name = load_model()
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = T5ForConditionalGeneration.from_pretrained(model_name)
-st.title('Определение наименования вакансии на HeadHunter')
+st.title('Генерация заголовков статей для Telegram')
 text = load_text()
-result = st.button('Определить вакансию')
+result = st.button('Сгенерировать заголовок')
 
 if result:
     input_ids = tokenizer(
@@ -38,7 +38,7 @@ if result:
 
     headline = tokenizer.decode(output_ids, skip_special_tokens=True)
 
-    st.write('Вакансия: ', headline)
+    st.write('Заголовок статьи: ', headline)
 
 #text:  Организация и контроль рабочего процесса Эксплуатация зданий и сооружений Ремонтные работы Техническое обслуживание Энергетика Первичная бухгалтерская документация Работа с электронным документооборотом Договорная работа Оформление ведомости объёмов строительных, электромонтажных работ Работа с технической документацией Техническая эксплуатация Ведение переговоров Противопожарная безопасность Монтаж оборудования Административно-хозяйственная деятельность
 #summary:  Руководитель отдела эксплуатации зданий и сооружений
