@@ -1,32 +1,11 @@
 import io
 import streamlit as st
-from transformers import T5Tokenizer, T5ForConditionalGeneration
-import torch
+from transformers import AutoTokenizer, T5ForConditionalGeneration
 
-@st.cache(allow_output_mutation=True)
+@st.cache_resource
 def load_model ():
-    MODEL_NAME = 'basil-77/rut5-base-absum-hh'
-    return MODEL_NAME
-
-def summarize_text(text, model, tokenizer, num_beams=5):
-    # Preprocess the text
-    inputs = tokenizer.encode(
-        "summarize: " + text,
-        return_tensors='pt',
-        max_length=1024,
-        truncation=True
-    )
- 
-    # Generate the summary
-    summary_ids = model.generate(
-        inputs,
-        max_length=64,
-        num_beams=num_beams,
-        # early_stopping=True,
-    )
- 
-    # Decode and return the summary
-    return tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+    model_name = "IlyaGusev/rut5_base_headline_gen_telegram"
+    return model_name
 
 def load_text():
     uploaded_text = st.text_input(
@@ -36,19 +15,30 @@ def load_text():
     else:
         return None
 
-
-MODEL_NAME = load_model()
-model = T5ForConditionalGeneration.from_pretrained(MODEL_NAME)
-tokenizer = T5Tokenizer.from_pretrained(MODEL_NAME)
-model = model.eval();
+model_name = load_model()
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = T5ForConditionalGeneration.from_pretrained(model_name)
 st.title('Определение наименования вакансии на HeadHunter')
 text = load_text()
 result = st.button('Определить вакансию')
+
 if result:
-    summary = summarize_text(text=text,
-                  model=model,
-                  tokenizer=tokenizer) 
-    print('Вакансия: ', summary)
+    input_ids = tokenizer(
+        [text],
+        max_length=600,
+        add_special_tokens=True,
+        padding="max_length",
+        truncation=True,
+        return_tensors="pt"
+    )["input_ids"]
+
+    output_ids = model.generate(
+        input_ids=input_ids
+    )[0]
+
+    headline = tokenizer.decode(output_ids, skip_special_tokens=True)
+
+    st.write('Вакансия: ', headline)
 
 #text:  Организация и контроль рабочего процесса Эксплуатация зданий и сооружений Ремонтные работы Техническое обслуживание Энергетика Первичная бухгалтерская документация Работа с электронным документооборотом Договорная работа Оформление ведомости объёмов строительных, электромонтажных работ Работа с технической документацией Техническая эксплуатация Ведение переговоров Противопожарная безопасность Монтаж оборудования Административно-хозяйственная деятельность
 #summary:  Руководитель отдела эксплуатации зданий и сооружений
