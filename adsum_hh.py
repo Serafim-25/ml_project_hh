@@ -6,10 +6,7 @@ import torch
 @st.cache(allow_output_mutation=True)
 def load_model ():
     MODEL_NAME = 'basil-77/rut5-base-absum-hh'
-    model = T5ForConditionalGeneration.from_pretrained(MODEL_NAME)
-    tokenizer = T5Tokenizer.from_pretrained(MODEL_NAME)
-    model = model.eval();
-    return MODEL_NAME, model, tokenizer
+    return MODEL_NAME
 
 def summarize_text(text, model, tokenizer, num_beams=5):
     # Preprocess the text
@@ -40,7 +37,10 @@ def load_text():
         return None
 
 
-MODEL_NAME, model, tokenizer = load_model()
+MODEL_NAME = load_model()
+model = T5ForConditionalGeneration.from_pretrained(MODEL_NAME)
+tokenizer = T5Tokenizer.from_pretrained(MODEL_NAME)
+model = model.eval();
 st.title('Определение наименования вакансии на HeadHunter')
 text = load_text()
 result = st.button('Определить вакансию')
