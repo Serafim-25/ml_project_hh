@@ -1,10 +1,15 @@
-import torch  
-from transformers import T5ForConditionalGeneration, T5Tokenizer
+import io
+import streamlit as st
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+import torch
 
-MODEL_NAME = 'basil-77/rut5-base-absum-hh'
-model = T5ForConditionalGeneration.from_pretrained(MODEL_NAME)
-tokenizer = T5Tokenizer.from_pretrained(MODEL_NAME)
-model.eval();
+@st.cache(allow_output_mutation=True)
+def load_model ():
+    MODEL_NAME = 'basil-77/rut5-base-absum-hh'
+    model = T5ForConditionalGeneration.from_pretrained(MODEL_NAME)
+    tokenizer = T5Tokenizer.from_pretrained(MODEL_NAME)
+    model = model.eval();
+    return MODEL_NAME, model, tokenizer
 
 def summarize_text(text, model, tokenizer, num_beams=5):
     # Preprocess the text
@@ -26,13 +31,24 @@ def summarize_text(text, model, tokenizer, num_beams=5):
     # Decode and return the summary
     return tokenizer.decode(summary_ids[0], skip_special_tokens=True)
 
-text = 'Организация и контроль рабочего процесса Эксплуатация зданий и сооружений Ремонтные работы Техническое обслуживание Энергетика Первичная бухгалтерская документация Работа с электронным документооборотом Договорная работа Оформление ведомости объёмов строительных, электромонтажных работ Работа с технической документацией Техническая эксплуатация Ведение переговоров Противопожарная безопасность Монтаж оборудования Административно-хозяйственная деятельность'
+def load_text():
+    uploaded_text = st.text_input(
+        label ="Вставьте описание навыков и опыта для определения вакансии")
+    if uploaded_text is not None:
+        return uploaded_text
+    else:
+        return None
 
-summary = summarize_text(text=text,
-              model=model,
-              tokenizer=tokenizer) 
-print('text: ', text)
-print('summary: ', summary)
+
+MODEL_NAME, model, tokenizer = load_model()
+st.title('Определение наименования вакансии на HeadHunter')
+text = load_text()
+result = st.button('Определить вакансию')
+if result:
+    summary = summarize_text(text=text,
+                  model=model,
+                  tokenizer=tokenizer) 
+    print('Вакансия: ', summary)
 
 #text:  Организация и контроль рабочего процесса Эксплуатация зданий и сооружений Ремонтные работы Техническое обслуживание Энергетика Первичная бухгалтерская документация Работа с электронным документооборотом Договорная работа Оформление ведомости объёмов строительных, электромонтажных работ Работа с технической документацией Техническая эксплуатация Ведение переговоров Противопожарная безопасность Монтаж оборудования Административно-хозяйственная деятельность
 #summary:  Руководитель отдела эксплуатации зданий и сооружений
