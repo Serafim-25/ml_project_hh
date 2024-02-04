@@ -27,5 +27,3 @@ def predict(item: Item):
     )[0]
 
     return tokenizer.decode(output_ids, skip_special_tokens=True)
-
-#test
